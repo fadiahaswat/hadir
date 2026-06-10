@@ -161,9 +161,9 @@ window.switchTahfizhSubTab = function(subtabName) {
     
     document.querySelectorAll('.tahfizh-sub-nav-btn').forEach(btn => {
         if (btn.dataset.subtab === subtabName) {
-            btn.className = "tahfizh-sub-nav-btn active flex-1 md:flex-none px-4 py-2.5 text-xs font-bold rounded-xl transition-all bg-white text-orange-600 shadow-sm border border-orange-100 dark:border-orange-950/20";
+            btn.className = "tahfizh-sub-nav-btn active flex-shrink-0 px-4 py-2.5 text-xs font-bold rounded-xl transition-all bg-white text-orange-600 shadow-sm border border-orange-100 dark:border-orange-950/20";
         } else {
-            btn.className = "tahfizh-sub-nav-btn flex-1 md:flex-none px-4 py-2.5 text-xs font-bold rounded-xl transition-all text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200";
+            btn.className = "tahfizh-sub-nav-btn flex-shrink-0 px-4 py-2.5 text-xs font-bold rounded-xl transition-all text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200";
         }
     });
     
@@ -190,8 +190,14 @@ async function initTahfizhTab() {
 function syncSiswaFromMainApp() {
     if (typeof MASTER_SANTRI === 'undefined' || MASTER_SANTRI.length === 0) return;
 
+    const activeClass = appState.selectedClass;
+    if (!activeClass) return;
+
+    // Hanya ambil santri dari kelas aktif Musyrif
+    const classStudents = MASTER_SANTRI.filter(s => s.kelas === activeClass);
+
     // Map properti program dari spreadsheet Tahfizh jika sudah pernah dimuat
-    TahfizhState.rawSantriList = MASTER_SANTRI.map(s => {
+    TahfizhState.rawSantriList = classStudents.map(s => {
         const normName = normalizeTahfizhName(s.nama);
         const program = TahfizhState.studentProgramMap.get(normName) || 'Tahfizh';
         const musyrif = (window.classData && window.classData[s.kelas]?.musyrif) || s.musyrif_khusus || '-';
@@ -273,7 +279,15 @@ function processTahfizhResponse(response) {
 
     // 4. Proses Setoran
     if (response.setoran) {
-        TahfizhState.allSetoran = response.setoran.map(item => ({
+        const activeStudentNames = new Set(TahfizhState.rawSantriList.map(s => normalizeTahfizhName(s.nama)));
+        
+        // Hanya muat setoran untuk santri yang ada di kelas aktif Musyrif
+        const filteredSetoran = response.setoran.filter(item => {
+            const normName = normalizeTahfizhName(item.namaSantri || '');
+            return activeStudentNames.has(normName);
+        });
+
+        TahfizhState.allSetoran = filteredSetoran.map(item => ({
             id: `row-${item.rowNumber}`,
             santriId: TahfizhState.santriNameMap.get(normalizeTahfizhName(item.namaSantri || '')) || null,
             createdAt: item.tanggal,

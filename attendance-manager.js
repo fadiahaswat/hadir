@@ -789,3 +789,36 @@ window.handleSearch = function (val) {
   appState.searchQuery = val;
   window.renderAttendanceList();
 };
+
+window.handleQuickPresence = function () {
+  const currentSlot = window.determineCurrentSlot();
+  if (currentSlot && SLOT_WAKTU[currentSlot]) {
+    appState.currentSlotId = currentSlot;
+    
+    // Check if slot is holiday today
+    if (window.isSlotHoliday(currentSlot, appState.date)) {
+      return window.showToast(
+        `Sesi presensi ${SLOT_WAKTU[currentSlot].label} libur hari ini.`,
+        "info"
+      );
+    }
+    
+    // Check if slot is accessible
+    const access = window.isSlotAccessible(currentSlot, appState.date);
+    if (access.locked) {
+      let msg = `Sesi ${SLOT_WAKTU[currentSlot].label} (${SLOT_WAKTU[currentSlot].subLabel || ''}) belum dibuka/diakses saat ini.`;
+      if (access.reason === "wait") {
+        msg = `Sesi ${SLOT_WAKTU[currentSlot].label} (${SLOT_WAKTU[currentSlot].subLabel || ''}) belum masuk waktu presensi.`;
+      } else if (access.reason === "limit") {
+        msg = `Akses sesi ${SLOT_WAKTU[currentSlot].label} dikunci (batas edit data lampau).`;
+      }
+      return window.showToast(msg, "warning");
+    }
+
+    // Open presence panel
+    window.openAttendance();
+  } else {
+    window.showToast("Tidak ada sesi presensi aktif saat ini.", "info");
+  }
+};
+
