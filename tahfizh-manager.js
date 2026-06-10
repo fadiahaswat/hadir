@@ -860,7 +860,15 @@ function renderTahfizhJuzContent(targetKey, searchTerm = '') {
 
     const targetSantri = TahfizhState.santriData.filter(s => s.program === targetProgram);
     if (targetSantri.length === 0) {
-        contentContainer.innerHTML = `<p class="text-center text-slate-500 dark:text-slate-400 py-6 italic">Tidak ada santri program ${targetProgram}.</p>`;
+        contentContainer.innerHTML = `
+          <div class="flex flex-col items-center justify-center py-12 px-4 bg-slate-50/50 dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-slate-800 text-center w-full">
+            <div class="w-12 h-12 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-2xl flex items-center justify-center mb-3 shadow-sm border border-slate-100 dark:border-slate-700">
+              <i data-lucide="users" class="w-6 h-6"></i>
+            </div>
+            <p class="text-xs font-bold text-slate-500 dark:text-slate-400">Tidak ada santri program ${targetProgram}.</p>
+          </div>
+        `;
+        if (window.lucide) window.lucide.createIcons();
         return;
     }
 
@@ -1418,7 +1426,15 @@ function renderTahfizhRaporComposition(santri) {
     const countMutqin = validSetoran.filter(s => ['Mutqin', 'Murajaah'].includes(s.jenis)).length;
 
     if (countZiyadah === 0 && countMutqin === 0) {
-        canvas.parentElement.innerHTML = '<p class="text-slate-400 dark:text-slate-550 font-bold text-xs italic">Belum ada data setoran.</p>';
+        canvas.parentElement.innerHTML = `
+          <div class="flex flex-col items-center justify-center py-8 text-center w-full">
+            <div class="w-10 h-10 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-xl flex items-center justify-center mb-2 border border-slate-100 dark:border-slate-700">
+              <i data-lucide="pie-chart" class="w-5 h-5"></i>
+            </div>
+            <p class="text-slate-400 dark:text-slate-500 font-bold text-xs italic">Belum ada data setoran.</p>
+          </div>
+        `;
+        if (window.lucide) window.lucide.createIcons();
         return;
     }
 

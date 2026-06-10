@@ -221,13 +221,29 @@ window.updateLocationStatus = function () {
     },
     (error) => {
       if (elLoading) elLoading.classList.add("hidden");
+      if (elDetails) elDetails.classList.add("hidden");
       if (elError) {
         elError.classList.remove("hidden");
-        let msg = "Gagal deteksi lokasi.";
-        if (error.code === 1) msg = "Izin lokasi ditolak.";
-        else if (error.code === 2) msg = "Sinyal GPS lemah.";
-        else if (error.code === 3) msg = "Waktu GPS habis.";
-        elError.innerHTML = `<p class="text-[10px] font-bold text-red-500 leading-tight">${msg}</p>`;
+        let msg = "Gagal mendeteksi lokasi.";
+        if (error.code === 1) msg = "Akses Lokasi Ditolak. Harap aktifkan izin lokasi/GPS pada browser Anda.";
+        else if (error.code === 2) msg = "Sinyal GPS tidak akurat atau lemah.";
+        else if (error.code === 3) msg = "Waktu deteksi GPS habis.";
+        
+        elError.innerHTML = `
+          <div class="flex items-start gap-3 p-3 bg-red-50/50 dark:bg-red-950/20 rounded-2xl border border-red-100 dark:border-red-900/30 text-left">
+            <div class="w-8 h-8 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
+              <i data-lucide="map-pin-off" class="w-4 h-4"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h5 class="text-xs font-bold text-red-700 dark:text-red-450">Verifikasi GPS Gagal</h5>
+              <p class="text-[10px] text-slate-500 dark:text-slate-450 font-semibold mt-0.5 leading-relaxed">${msg}</p>
+              <button onclick="window.updateLocationStatus()" class="mt-2.5 px-3 py-1.5 bg-red-500 hover:bg-red-600 active:scale-95 text-white font-bold text-[10px] rounded-lg shadow-sm transition-all flex items-center gap-1.5 w-fit">
+                <i data-lucide="refresh-cw" class="w-3 h-3"></i> Coba Lagi
+              </button>
+            </div>
+          </div>
+        `;
+        if (window.lucide) window.lucide.createIcons();
       }
     },
     { enableHighAccuracy: true, timeout: 5000, maximumAge: GPS_CACHE_DURATION },

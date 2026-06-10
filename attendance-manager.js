@@ -122,6 +122,24 @@ window.renderAttendanceList = function () {
 
   const fragment = document.createDocumentFragment();
 
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="flex flex-col items-center justify-center py-16 px-4 bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700/50 shadow-sm text-center animate-[fadeIn_0.3s_ease-out] w-full">
+        <div class="w-16 h-16 bg-slate-50 dark:bg-slate-900 rounded-2xl flex items-center justify-center mb-4 text-slate-400">
+          <i data-lucide="${appState.searchQuery ? 'search' : 'users'}" class="w-8 h-8"></i>
+        </div>
+        <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200">
+          ${appState.searchQuery ? 'Tidak Ada Hasil' : 'Daftar Kosong'}
+        </h3>
+        <p class="text-xs text-slate-400 mt-1 max-w-[240px] leading-relaxed">
+          ${appState.searchQuery ? `Tidak ada santri bernama "${appState.searchQuery}"` : 'Semua santri di kelas ini sudah diabsen atau tidak ada data.'}
+        </p>
+      </div>
+    `;
+    if (window.lucide) window.lucide.createIcons();
+    return;
+  }
+
   list.forEach((santri) => {
     const id = String(santri.nis || santri.id);
 

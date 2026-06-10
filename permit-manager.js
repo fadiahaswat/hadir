@@ -133,8 +133,15 @@ window.renderPermitList = function () {
   }
 
   if (activePermits.length === 0) {
-    container.innerHTML =
-      '<div class="text-center py-6 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-xs font-bold">Tidak ada yang izin/sakit</div>';
+    container.innerHTML = `
+      <div class="flex flex-col items-center justify-center py-10 px-4 bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700/50 shadow-sm text-center w-full">
+        <div class="w-12 h-12 bg-slate-50 dark:bg-slate-900 rounded-2xl flex items-center justify-center mb-3 text-slate-450 dark:text-slate-500">
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
+        </div>
+        <p class="text-xs font-bold text-slate-500 dark:text-slate-400">Semua santri lengkap / Hadir</p>
+      </div>
+    `;
+    if (window.lucide) window.lucide.createIcons();
     return;
   }
 
@@ -680,12 +687,14 @@ window.renderPermitHistory = function () {
 
   if (history.length === 0) {
     container.innerHTML = `
-            <div class="flex flex-col items-center justify-center py-12 border-2 border-dashed border-slate-100 dark:border-slate-700 rounded-2xl">
-                <i data-lucide="folder-open" class="w-12 h-12 mb-3 text-slate-300 dark:text-slate-600 stroke-1"></i>
-                <p class="text-xs font-bold text-slate-400 dark:text-slate-500">
-                    ${searchVal || filterCat !== "all" ? "Tidak ada hasil yang cocok" : "Belum ada riwayat perizinan"}
-                </p>
-            </div>`;
+      <div class="flex flex-col items-center justify-center py-12 px-4 bg-slate-50 dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-slate-800 text-center w-full">
+        <div class="w-12 h-12 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-2xl flex items-center justify-center mb-3 shadow-sm border border-slate-100 dark:border-slate-700">
+          <i data-lucide="folder-open" class="w-6 h-6"></i>
+        </div>
+        <p class="text-xs font-bold text-slate-500 dark:text-slate-400">
+          ${searchVal || filterCat !== "all" ? "Tidak ada hasil yang cocok" : "Belum ada riwayat perizinan"}
+        </p>
+      </div>`;
     window.refreshIcons();
     return;
   }
