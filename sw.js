@@ -1,23 +1,11 @@
-const CACHE_NAME = "musyrif-app-v12";
+const CACHE_NAME = "musyrif-app-v19";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
-  "./output.css",
+  "./output.css", // PERBAIKAN: Ganti style.css menjadi output.css
   "./config.js",
-  "./app-core.js",
-  "./tab-manager.js",
-  "./auth-manager.js",
-  "./date-manager.js",
-  "./activity-logger.js",
-  "./notification-manager.js",
-  "./dashboard-manager.js",
-  "./attendance-manager.js",
-  "./permit-manager.js",
-  "./analysis-manager.js",
-  "./export-manager.js",
-  "./tahfizh-manager.js",
-  "./tahfizh_metadata.json",
   "./script.js",
+  "./santri-manager.js",
   "./data-santri.js",
   "./data-kelas.js",
   "./manifest.json",

@@ -32,12 +32,6 @@ const APP_CONFIG = {
   activityLogKey: "musyrif_activity_log",
   settingsKey: "musyrif_settings",
   googleAuthKey: "musyrif_google_session",
-  remindersKey: "musyrif_reminders_db",
-  agendasKey: "musyrif_agendas_db",
-  studentLogsKey: "musyrif_student_logs",
-  violationsKey: "musyrif_violations",
-  studentTargetsKey: "musyrif_student_targets",
-  auditLogsKey: "musyrif_audit_logs",
   googleClientId: window.APP_CREDENTIALS.googleClientId,
 };
 
@@ -49,10 +43,36 @@ const GPS_CACHE_KEY = "presensi_gps_cache";
 
 const GPS_CACHE_DURATION = 15 * 60 * 1000; // 15 menit
 
-const GEO_CONFIG = window.GEO_CONFIG || {
-  useGeofencing: false,
-  maxRadiusMeters: 100,
-  locations: [],
+const GEO_CONFIG = {
+  useGeofencing: true, // Set ke false jika ingin mematikan fitur ini sementara
+  maxRadiusMeters: 100, // Radius toleransi dalam meter (misal: 50 meter)
+  locations: [
+    {
+      name: "Masjid Jami' Mu'allimin",
+      lat: -7.807757309250455, // GANTI DENGAN KOORDINAT ASLI
+      lng: 110.35091531948025, // GANTI DENGAN KOORDINAT ASLI
+    },
+    {
+      name: "Aula Asrama 10",
+      lat: -7.807645469455366, // GANTI DENGAN KOORDINAT ASLI
+      lng: 110.35180282962452, // GANTI DENGAN KOORDINAT ASLI
+    },
+    {
+      name: "Mushola Asrama 8",
+      lat: -7.806781091907755, // GANTI DENGAN KOORDINAT ASLI
+      lng: 110.34871697299599, // GANTI DENGAN KOORDINAT ASLI
+    },
+    {
+      name: "Masjid Hajah Yuliana",
+      lat: -7.807337010430911, // GANTI DENGAN KOORDINAT ASLI
+      lng: 110.26653812830205, // GANTI DENGAN KOORDINAT ASLI
+    },
+    {
+      name: "Kantor Muhammadiyah Supeno",
+      lat: -7.8163746365704725, // GANTI DENGAN KOORDINAT ASLI
+      lng: 110.37986454893164, // GANTI DENGAN KOORDINAT ASLI
+    },
+  ],
 };
 
 const UI_COLORS = {
@@ -91,12 +111,12 @@ window.parseJwt = function (token) {
   var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
   var jsonPayload = decodeURIComponent(
     window
-    .atob(base64)
-    .split("")
-    .map(function (c) {
-      return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-    })
-    .join(""),
+      .atob(base64)
+      .split("")
+      .map(function (c) {
+        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+      })
+      .join(""),
   );
   return JSON.parse(jsonPayload);
 };
@@ -134,7 +154,7 @@ window.formatDate = function (dateStr) {
   ];
 
   const d = new Date(dateStr + "T12:00:00");
-  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
 };
 
 // Cek apakah tanggal Masehi (YYYY-MM-DD) jatuh di bulan Ramadhan (Hijriyah ke-9)
@@ -197,30 +217,10 @@ let appState = {
   date: window.getLocalDateStr(),
   timesheetViewDate: window.getLocalDateStr(),
   activityLog: [],
-  reminders: [],
-  agendas: [],
-  studentLogs: [],
-  violations: [],
-  studentTargets: {},
-  auditLogs: [],
   settings: {
     darkMode: false,
     notifications: true,
     autoSave: true,
-    notificationTypes: {
-      sesi_presensi_mulai: true,
-      sesi_mahad_mulai: true,
-      sisa_5_menit: true,
-      sisa_1_menit: true,
-      belum_lengkap_kemarin: true,
-      ada_santri_belum: true,
-      ada_izin_belum_verif: true,
-      ada_kegiatan_mulai: true,
-      ada_rapat_musyrif: true,
-      pengingat_perpulangan: true,
-      pengingat_puasa: true,
-      pengingat_tahfizh: true,
-    },
   },
 };
 
@@ -244,7 +244,209 @@ let FILTERED_SANTRI = [];
 // ==========================================
 // SLOT & STATUS CONFIGURATION (UPDATED)
 // ==========================================
-const SLOT_WAKTU = window.SLOT_WAKTU || {};
+const SLOT_WAKTU = {
+  shubuh: {
+    id: "shubuh",
+    label: "Shubuh",
+    subLabel: "04:00 - 06:00",
+    theme: "emerald",
+    startHour: 4,
+    style: {
+      icon: "sunrise",
+      progressBg: "bg-emerald-500", // <-- TAMBAHKAN INI
+      gradient:
+        "from-emerald-50 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/20",
+      border: "hover:border-emerald-300 dark:hover:border-emerald-700",
+      text: "text-emerald-700 dark:text-emerald-300",
+      iconBg:
+        "bg-emerald-100 text-emerald-600 dark:bg-emerald-800 dark:text-emerald-200",
+    },
+    activities: [
+      { id: "shalat", label: "Shubuh", type: "mandator", category: "fardu" },
+      {
+        id: "qabliyah",
+        label: "Qabliyah",
+        type: "sunnah",
+        category: "dependent",
+      },
+      {
+        id: "dzikir_pagi",
+        label: "Dzikir",
+        type: "sunnah",
+        category: "dependent",
+      },
+
+      // PERBAIKAN 1: Tahfizh hanya muncul Senin (1) s/d Sabtu (6). Ahad (0) libur.
+      {
+        id: "tahfizh",
+        label: "Tahfizh",
+        type: "mandator",
+        category: "kbm",
+        showOnDays: [1, 2, 3, 4, 5, 6],
+      },
+
+      { id: "tahajjud", label: "Tahajjud", type: "sunnah", category: "sunnah" },
+      // Ahad pagi diganti Conversation (sudah benar sesuai kode awal)
+      {
+        id: "conversation",
+        label: "Conver",
+        type: "mandator",
+        category: "kbm",
+        showOnDays: [0],
+      },
+    ],
+  },
+
+  // --- SESI BARU: SEKOLAH ---
+  sekolah: {
+    id: "sekolah",
+    label: "Sekolah",
+    subLabel: "06:00 - 15:00",
+    theme: "cyan",
+    startHour: 6,
+    style: {
+      icon: "graduation-cap",
+      progressBg: "bg-cyan-500", // <-- TAMBAHKAN INI
+      gradient:
+        "from-cyan-50 to-blue-100 dark:from-cyan-900/40 dark:to-blue-900/20",
+      border: "hover:border-cyan-300 dark:hover:border-cyan-700",
+      text: "text-cyan-700 dark:text-cyan-300",
+      iconBg: "bg-cyan-100 text-cyan-600 dark:bg-cyan-800 dark:text-cyan-200",
+    },
+    activities: [
+      // PERBAIKAN 2: Sekolah hanya muncul Senin (1) s/d Sabtu (6). Ahad (0) libur.
+      {
+        id: "kbm_sekolah",
+        label: "KBM Sekolah",
+        type: "mandator",
+        category: "school",
+        showOnDays: [1, 2, 3, 4, 5, 6],
+      },
+    ],
+  },
+  ashar: {
+    id: "ashar",
+    label: "Ashar",
+    subLabel: "15:00 - 17:00",
+    theme: "orange",
+    startHour: 15,
+    style: {
+      icon: "sun",
+      progressBg: "bg-orange-500", // <-- TAMBAHKAN INI
+      gradient:
+        "from-orange-50 to-amber-100 dark:from-orange-900/40 dark:to-amber-900/20",
+      border: "hover:border-orange-300 dark:hover:border-orange-700",
+      text: "text-orange-700 dark:text-orange-300",
+      iconBg:
+        "bg-orange-100 text-orange-600 dark:bg-orange-800 dark:text-orange-200",
+    },
+    activities: [
+      { id: "shalat", label: "Ashar", type: "mandator", category: "fardu" },
+      {
+        id: "dzikir_petang",
+        label: "Dzikir",
+        type: "sunnah",
+        category: "dependent",
+      },
+    ],
+  },
+  maghrib: {
+    id: "maghrib",
+    label: "Maghrib",
+    subLabel: "18:00 - 19:00",
+    theme: "indigo",
+    startHour: 18,
+    style: {
+      icon: "sunset",
+      progressBg: "bg-indigo-500", // <-- TAMBAHKAN INI
+      gradient:
+        "from-indigo-50 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/20",
+      border: "hover:border-indigo-300 dark:hover:border-indigo-700",
+      text: "text-indigo-700 dark:text-indigo-300",
+      iconBg:
+        "bg-indigo-100 text-indigo-600 dark:bg-indigo-800 dark:text-indigo-200",
+    },
+    activities: [
+      { id: "shalat", label: "Maghrib", type: "mandator", category: "fardu" },
+      {
+        id: "bakdiyah",
+        label: "Ba'diyah",
+        type: "sunnah",
+        category: "dependent",
+      },
+      { id: "dhuha", label: "Dhuha", type: "sunnah", category: "sunnah" },
+      { id: "puasa", label: "Puasa", type: "sunnah", category: "sunnah" },
+      {
+        id: "puasa_ramadhan",
+        label: "P.Rmdn",
+        type: "mandator",
+        category: "fardu",
+        onlyRamadhan: true,
+      },
+      {
+        id: "tahsin",
+        label: "Tahsin",
+        type: "mandator",
+        category: "kbm",
+        showOnDays: [4, 5],
+      },
+      {
+        id: "conversation",
+        label: "Conver",
+        type: "mandator",
+        category: "kbm",
+        showOnDays: [3],
+      },
+      {
+        id: "vocabularies",
+        label: "Vocab",
+        type: "mandator",
+        category: "kbm",
+        showOnDays: [1, 2],
+      },
+    ],
+  },
+  isya: {
+    id: "isya",
+    label: "Isya",
+    subLabel: "19:00 - 21:00",
+    theme: "slate",
+    startHour: 19,
+    style: {
+      icon: "moon",
+      progressBg: "bg-slate-500", // <-- TAMBAHKAN INI
+      gradient:
+        "from-slate-50 to-blue-100 dark:from-slate-800 dark:to-blue-900/40",
+      border: "hover:border-blue-300 dark:hover:border-blue-700",
+      text: "text-slate-700 dark:text-slate-300",
+      iconBg:
+        "bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300",
+    },
+    activities: [
+      { id: "shalat", label: "Isya", type: "mandator", category: "fardu" },
+      {
+        id: "bakdiyah",
+        label: "Ba'diyah",
+        type: "sunnah",
+        category: "dependent",
+      },
+      {
+        id: "alkahfi",
+        label: "Al-Kahfi",
+        type: "sunnah",
+        category: "sunnah",
+        showOnDays: [4],
+      },
+      {
+        id: "tarawih",
+        label: "Tarawih",
+        type: "sunnah",
+        category: "sunnah",
+        onlyRamadhan: true,
+      },
+    ],
+  },
+};
 
 const STATUS_UI = {
   Hadir: {
@@ -344,7 +546,19 @@ const PEMBINAAN_RULES = [
 ];
 
 // Helper: Hitung Total Alpa Santri
-
+window.countTotalAlpa = function (studentId) {
+  let total = 0;
+  // Loop semua tanggal yang ada di data
+  Object.keys(appState.attendanceData).forEach((date) => {
+    const dayData = appState.attendanceData[date];
+    // Loop semua slot (shubuh, ashar, etc)
+    Object.values(SLOT_WAKTU).forEach((slot) => {
+      const status = dayData[slot.id]?.[studentId]?.status?.shalat;
+      if (status === "Alpa") total++;
+    });
+  });
+  return total;
+};
 
 // Helper: Tentukan Status Pembinaan
 window.getPembinaanStatus = function (alpaCount) {
@@ -370,286 +584,5 @@ window.getCachedLocation = function () {
     return cache;
   } catch {
     return null;
-  }
-};
-
-
-// ==========================================
-// CORE UTILITIES & CALCULATIONS (REFACTORED)
-// ==========================================
-
-// ==========================================
-// 4. LOGIC PERHITUNGAN (REFACTORED)
-// ==========================================
-
-window.isHoliday = function (
-  dateStr,
-  slotId = null,
-  activityId = null,
-  category = null,
-) {
-  const holidays = appState.holidays || [];
-  return (
-    holidays.find((h) => {
-      if (h.date !== dateStr) return false;
-      if (h.type === "activity" && activityId) {
-        return h.activityId === activityId;
-      }
-      if (h.type === "slot" && slotId) {
-        return h.slotId === slotId;
-      }
-      if (h.type === "category" && category) {
-        return h.category === category;
-      }
-      return false;
-    }) || null
-  );
-};
-
-window.isActivityHoliday = function (dateStr, slotId, activityId) {
-  return !!window.isHoliday(dateStr, slotId, activityId);
-};
-
-window.isCategoryHoliday = function (dateStr, category) {
-  return !!window.isHoliday(dateStr, null, null, category);
-};
-
-window.isSlotHoliday = function (slotId, dateStr) {
-  const slotHoliday = window.isHoliday(dateStr, slotId);
-  if (slotHoliday) {
-    return true;
-  }
-  const dayNum = new Date(dateStr).getDay();
-  const slotConfig = SLOT_WAKTU[slotId];
-  if (!slotConfig || !slotConfig.activities) {
-    return true;
-  }
-  const activeActs = slotConfig.activities.filter((act) => {
-    if (window.isActivityHoliday(dateStr, slotId, act.id)) {
-      return false;
-    }
-    if (window.isCategoryHoliday(dateStr, act.category)) {
-      return false;
-    }
-    if (act.showOnDays && !act.showOnDays.includes(dayNum)) return false;
-    if (act.onlyRamadhan && !window.isRamadhan(dateStr)) return false;
-    return true;
-  });
-  return activeActs.length === 0;
-};
-
-window.calculateSlotStats = function (slotId, customDate = null) {
-  const stats = {
-    h: 0,
-    t: 0,
-    i: 0,
-    s: 0,
-    p: 0,
-    a: 0,
-    total: 0,
-    isFilled: false,
-  };
-
-  // Cegah error jika data santri belum siap
-  if (!FILTERED_SANTRI || FILTERED_SANTRI.length === 0) return stats;
-
-  const dateKey = customDate || appState.date;
-
-  // JIKA LIBUR, otomatis kembalikan angka 0 (Progress Bar akan kosong/aman)
-  if (window.isSlotHoliday(slotId, dateKey)) return stats;
-
-  const slotData = appState.attendanceData[dateKey]?.[slotId];
-  if (!slotData) return stats;
-
-  const dayNum = new Date(dateKey).getDay();
-  const slotConfig = SLOT_WAKTU[slotId];
-
-  const mainAct = slotConfig.activities.find((act) => {
-    if (act.showOnDays && !act.showOnDays.includes(dayNum)) return false;
-    if (act.onlyRamadhan && !window.isRamadhan(dateKey)) return false;
-    if (window.isActivityHoliday(dateKey, slotId, act.id)) {
-      return false;
-    }
-
-    if (window.isCategoryHoliday(dateKey, act.category)) {
-      return false;
-    }
-    return true;
-  });
-
-  if (!mainAct) return stats;
-
-  // Hitung spesifik untuk santri yang sedang difilter saja (mencegah progress > 100%)
-  FILTERED_SANTRI.forEach((s) => {
-    const id = String(s.nis || s.id);
-    const status = slotData[id]?.status?.[mainAct.id];
-
-    if (status) {
-      stats.isFilled = true;
-      if (status === "Hadir") stats.h++;
-      else if (status === "Telat") stats.t++;
-      else if (status === "Izin") stats.i++;
-      else if (status === "Sakit") stats.s++;
-      else if (status === "Pulang") stats.p++;
-      else if (status === "Alpa") stats.a++;
-      stats.total++; // Ini jumlah anak yang SUDAH diabsen
-    }
-  });
-
-  return stats;
-};
-
-window.getSlotCompletionStatus = function (slotId, dateStr) {
-  const slotData = appState.attendanceData?.[dateStr]?.[slotId];
-
-  if (!slotData) {
-    return {
-      total: 0,
-      filled: 0,
-      complete: false,
-    };
-  }
-
-  let totalSantri = 0;
-  let filledSantri = 0;
-
-  FILTERED_SANTRI.forEach((s) => {
-    const id = String(s.nis || s.id);
-
-    totalSantri++;
-
-    const status = window.getAttendanceStatus(id, slotId, dateStr);
-
-    if (status) {
-      filledSantri++;
-    }
-  });
-
-  return {
-    total: totalSantri,
-    filled: filledSantri,
-    complete: filledSantri === totalSantri,
-  };
-};
-
-window.getAttendanceStatus = function (santriId, slotId, customDate = null) {
-  try {
-    const dateKey = customDate || appState.date;
-
-    const slotData = appState.attendanceData?.[dateKey]?.[slotId];
-
-    if (!slotData) return null;
-
-    const dayNum = new Date(dateKey).getDay();
-
-    const slotConfig = SLOT_WAKTU[slotId];
-
-    if (!slotConfig) return null;
-
-    const mainAct = slotConfig.activities.find((act) => {
-      if (act.showOnDays && !act.showOnDays.includes(dayNum)) return false;
-
-      if (act.onlyRamadhan && !window.isRamadhan(dateKey)) return false;
-
-      return true;
-    });
-
-    if (!mainAct) return null;
-
-    const id = String(santriId);
-
-    return slotData[id]?.status?.[mainAct.id] || null;
-  } catch (err) {
-    console.error("getAttendanceStatus error:", err);
-    return null;
-  }
-};
-
-
-
-
-window.saveData = function () {
-  clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(() => {
-    try {
-      const dataStr = JSON.stringify(appState.attendanceData);
-
-      // Check localStorage quota (iOS Safari limit ~5MB)
-      if (dataStr.length > window.APP_CONSTANTS.maxStorageBytes) {
-        console.warn("Data mendekati batas storage!");
-        window.showToast("Data hampir penuh. Pertimbangkan export.", "warning");
-      }
-
-      localStorage.setItem(APP_CONFIG.storageKey, dataStr);
-
-      if (appState.settings.autoSave) {
-        const indicator = document.getElementById("save-indicator");
-        if (indicator) {
-          indicator.innerHTML =
-            '<i data-lucide="check" class="w-5 h-5 text-emerald-500"></i>';
-          window.refreshIcons();
-          setTimeout(() => (indicator.innerHTML = ""), 1000);
-        }
-      }
-    } catch (e) {
-      if (e.name === "QuotaExceededError") {
-        window.showToast("Storage penuh! Hapus data lama.", "error");
-      } else {
-        window.showToast("Gagal menyimpan: " + e.message, "error");
-      }
-      console.error("Save error:", e);
-    }
-  }, 500); // Increased debounce for better batching
-};
-
-
-
-
-window.getDayCompletionStatus = function (dateStr) {
-  let requiredSlots = 0;
-  let completedSlots = 0;
-
-  Object.values(SLOT_WAKTU).forEach((slot) => {
-    if (window.isSlotHoliday(slot.id, dateStr)) {
-      return;
-    }
-
-    requiredSlots++;
-
-    const completion = window.getSlotCompletionStatus(slot.id, dateStr);
-
-    if (completion.complete) {
-      completedSlots++;
-    }
-  });
-
-  return {
-    requiredSlots,
-    completedSlots,
-    complete: requiredSlots > 0 && completedSlots >= requiredSlots,
-  };
-};
-
-window.logActivityAudit = function (action, studentName, details) {
-  const logEntry = {
-    id: "audit_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
-    timestamp: new Date().toISOString(),
-    musyrif: (appState.userProfile && appState.userProfile.email) ? appState.userProfile.email : "tester-musyrif@gmail.com",
-    action: action,
-    studentName: studentName || "-",
-    details: details || ""
-  };
-  
-  if (!appState.auditLogs) appState.auditLogs = [];
-  appState.auditLogs.unshift(logEntry);
-  
-  if (appState.auditLogs.length > 100) {
-    appState.auditLogs.pop();
-  }
-  
-  localStorage.setItem(APP_CONFIG.auditLogsKey, JSON.stringify(appState.auditLogs));
-  
-  if (window.logActivity) {
-    window.logActivity(action, `${studentName}: ${details}`);
   }
 };
