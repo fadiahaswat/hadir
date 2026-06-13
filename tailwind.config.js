@@ -18,11 +18,17 @@ module.exports = {
       },
       colors: {
         brand: {
-          50: "#ecfdf5",
-          100: "#d1fae5",
-          500: "#10b981",
-          600: "#059669",
-          900: "#064e3b",
+          50: "#e6f5ff",
+          100: "#cceeff",
+          500: "#0C81E4", // Vibrant Blue
+          600: "#0C4E8C", // Deep Blue
+          900: "#062a4d",
+        },
+        palette: {
+          deep: "#0C4E8C",
+          blue: "#0C81E4",
+          cyan: "#11C4D4",
+          mint: "#4FE7AF",
         },
         dark: {
           bg: "#0f172a",

@@ -1,4 +1,4 @@
-const CACHE_NAME = "musyrif-app-v166-smooth-qibla-seamless-ios";
+const CACHE_NAME = "musyrif-app-v183-syamsa-login-splash";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -6,6 +6,11 @@ const ASSETS_TO_CACHE = [
   "./config.js",
   "./script.js",
   "./qibla.js",
+  "./icon.svg",
+  "./icon.webp",
+  "./icon.png",
+  "./splash.webp",
+  "./login.webp",
   "./santri-manager.js",
   "./data-santri.js",
   "./data-kelas.js",

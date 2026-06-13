@@ -860,7 +860,7 @@ window.updateLocationStatus = function () {
     if (elBadge) {
       if (cached.isInside) {
         elBadge.textContent = "Aman";
-        elBadge.className = "px-2 py-0.5 rounded-lg text-[9px] font-black uppercase bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/20 shrink-0";
+        elBadge.className = "px-2 py-0.5 rounded-lg text-[9px] font-black uppercase bg-palette-mint/10 text-slate-800 dark:text-palette-mint border border-palette-mint/30 shrink-0";
       } else {
         elBadge.textContent = "Jauh";
         elBadge.className = "px-2 py-0.5 rounded-lg text-[9px] font-black uppercase bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-500/20 shrink-0";
@@ -870,10 +870,10 @@ window.updateLocationStatus = function () {
     if (cached.isInside) {
       if (elIcon) {
         elIcon.setAttribute("data-lucide", "map-pin");
-        elIcon.className = "text-emerald-500 dark:text-emerald-400 transition-colors duration-500";
+        elIcon.className = "text-palette-blue dark:text-palette-cyan transition-colors duration-500";
       }
       if (elIconBg) {
-        elIconBg.className = "w-6 h-6 shrink-0 rounded-full bg-emerald-100/80 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-500 dark:text-emerald-400 transition-colors duration-500";
+        elIconBg.className = "w-6 h-6 shrink-0 rounded-full bg-palette-blue/10 dark:bg-palette-blue/20 flex items-center justify-center text-palette-blue dark:text-palette-cyan transition-colors duration-500";
       }
     } else {
       if (elIcon) {
@@ -977,20 +977,20 @@ window.updateLocationStatus = function () {
         if (elBadge) {
           elBadge.textContent = "Aman";
           elBadge.className =
-            "px-2 py-0.5 rounded-lg text-[9px] font-black uppercase bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/20 shrink-0";
+            "px-2 py-0.5 rounded-lg text-[9px] font-black uppercase bg-palette-mint/10 text-slate-800 dark:text-palette-mint border border-palette-mint/30 shrink-0";
         }
 
         if (elMessage) {
-          elMessage.innerHTML = `<span class="text-emerald-600 flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> Posisi sesuai. Silakan isi presensi.</span>`;
+          elMessage.innerHTML = `<span class="text-palette-blue flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> Posisi sesuai. Silakan isi presensi.</span>`;
         }
 
         if (elIcon) {
           elIcon.setAttribute("data-lucide", "map-pin");
-          elIcon.className = "text-emerald-500 dark:text-emerald-400 transition-colors duration-500";
+          elIcon.className = "text-palette-blue dark:text-palette-cyan transition-colors duration-500";
         }
 
         if (elIconBg) {
-          elIconBg.className = "w-6 h-6 shrink-0 rounded-full bg-emerald-100/80 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-500 dark:text-emerald-400 transition-colors duration-500";
+          elIconBg.className = "w-6 h-6 shrink-0 rounded-full bg-palette-blue/10 dark:bg-palette-blue/20 flex items-center justify-center text-palette-blue dark:text-palette-cyan transition-colors duration-500";
         }
       } else {
         // Tampilan MERAH (Jauh)
@@ -4958,7 +4958,7 @@ window.requestNotificationPermission = async function () {
       window.showToast("Notifikasi berhasil diaktifkan!", "success");
       window.sendLocalNotification(
         "Assalamu'alaikum!",
-        "Sistem pengingat presensi Musyrif aktif.",
+        "Sistem pengingat presensi Syamsa aktif.",
         "info",
       );
 
